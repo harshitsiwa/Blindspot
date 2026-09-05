@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Blindspot — Privacy-Preserving Vision Agent",
+  "version": "0.1.0",
+  "description": "Local perception and privacy firewall for browser AI agents (SIH26171)",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Blindspot Privacy Agent"
+  }
+}

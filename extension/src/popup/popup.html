@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blindspot Privacy Agent Debugger</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="card">
+    <header class="header">
+      <div class="brand">
+        <span class="logo">🛡️</span>
+        <div>
+          <h1>Blindspot Agent</h1>
+          <p class="subtitle">SIH26171 Privacy Firewall</p>
+        </div>
+      </div>
+      <div id="connection-badge" class="badge badge-disconnected">Checking...</div>
+    </header>
+
+    <main class="content">
+      <div class="section">
+        <label for="task-prompt">Task Goal / Prompt:</label>
+        <input type="text" id="task-prompt" placeholder="e.g. Log in to demo account" value="Interact with demo page safely" />
+      </div>
+
+      <button id="btn-step" class="btn btn-primary">
+        <span>🚀 Run Agent Step</span>
+      </button>
+
+      <div class="metrics-grid">
+        <div class="metric">
+          <span class="metric-value" id="val-elements">0</span>
+          <span class="metric-label">DOM Elements</span>
+        </div>
+        <div class="metric highlight-privacy">
+          <span class="metric-value" id="val-redacted">0</span>
+          <span class="metric-label">Redacted Fields</span>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">Active Page:</span>
+          <span class="info-val" id="val-page">None</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Planner Mode:</span>
+          <span class="info-val badge-mock" id="val-mode">MOCK MODE</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Last Action:</span>
+          <span class="info-val" id="val-action">None</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Execution Status:</span>
+          <span class="info-val" id="val-status">Idle</span>
+        </div>
+      </div>
+
+      <div class="log-box" id="log-box">Ready. Click 'Run Agent Step' to test local perception & server roundtrip.</div>
+    </main>
+
+    <footer class="footer">
+      <span>Trust Boundary Active • Zero RAW PII Egress</span>
+    </footer>
+  </div>
+
+  <script type="module" src="popup.ts"></script>
+</body>
+</html>
