@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const taskInput = document.getElementById('task-prompt') as HTMLInputElement;
   const valElements = document.getElementById('val-elements')!;
   const valRedacted = document.getElementById('val-redacted')!;
+  const valPrivacyStatus = document.getElementById('val-privacy-status')!;
   const valPage = document.getElementById('val-page')!;
   const valAction = document.getElementById('val-action')!;
   const valStatus = document.getElementById('val-status')!;
@@ -79,6 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (typeof state.sensitiveCount === 'number') {
       valRedacted.textContent = String(state.sensitiveCount);
+    }
+    if (state.privacyStatus) {
+      const pStatus = String(state.privacyStatus).toUpperCase();
+      valPrivacyStatus.textContent = pStatus;
+      valPrivacyStatus.style.color = pStatus === 'SAFE' ? '#10b981' : '#ef4444';
     }
     if (state.lastResponse && typeof state.lastResponse === 'object') {
       const resp = state.lastResponse as { action?: { action: string; target?: string } };

@@ -13,7 +13,7 @@
         <span class="logo">🛡️</span>
         <div>
           <h1>Blindspot Agent</h1>
-          <p class="subtitle">SIH26171 Privacy Firewall</p>
+          <p class="subtitle">SIH26171 Context & Privacy Firewall</p>
         </div>
       </div>
       <div id="connection-badge" class="badge badge-disconnected">Checking...</div>
@@ -32,15 +32,19 @@
       <div class="metrics-grid">
         <div class="metric">
           <span class="metric-value" id="val-elements">0</span>
-          <span class="metric-label">DOM Elements</span>
+          <span class="metric-label">Interactive Elements</span>
         </div>
         <div class="metric highlight-privacy">
           <span class="metric-value" id="val-redacted">0</span>
-          <span class="metric-label">Redacted Fields</span>
+          <span class="metric-label">Sensitive Redactions</span>
         </div>
       </div>
 
       <div class="info-box">
+        <div class="info-row">
+          <span class="info-label">Privacy Status:</span>
+          <span class="info-val" id="val-privacy-status" style="font-weight: bold; color: #10b981;">SAFE</span>
+        </div>
         <div class="info-row">
           <span class="info-label">Active Page:</span>
           <span class="info-val" id="val-page">None</span>

@@ -2,7 +2,7 @@ import { agentOrchestrator } from './agent-orchestrator';
 import { apiClient } from './api-client';
 import { privacyLog } from '../privacy/privacy-policy';
 
-privacyLog('Background Service Worker initialized.');
+privacyLog('Background Service Worker initialized (Phase 2).');
 
 chrome.runtime.onInstalled.addListener(() => {
   privacyLog('Blindspot Privacy Agent extension installed.');
@@ -21,6 +21,21 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'CAPTURE_VISUAL_TAB') {
+    if (chrome.tabs.captureVisibleTab) {
+      chrome.tabs.captureVisibleTab({ format: 'png' }, (dataUrl) => {
+        if (chrome.runtime.lastError || !dataUrl) {
+          sendResponse({ screenshot: null });
+        } else {
+          sendResponse({ screenshot: dataUrl });
+        }
+      });
+    } else {
+      sendResponse({ screenshot: null });
+    }
+    return true;
+  }
+
   if (message.type === 'STEP_AGENT') {
     agentOrchestrator
       .stepAgentCycle(message.taskPrompt)
@@ -36,4 +51,3 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   return false;
 });
-

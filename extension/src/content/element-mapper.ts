@@ -1,5 +1,5 @@
 /**
- * ElementMapper manages local stable element identifiers (e.g., "e1", "e2", "e3")
+ * ElementMapper manages local stable element identifiers (e.g., "el_001", "el_002", "e1", "e2")
  * mapped to actual DOM elements in the content script.
  * 
  * Crucially, this mapping stays strictly within browser memory and is NEVER transmitted
@@ -12,10 +12,21 @@ class ElementMapper {
 
   public reset(): void {
     this.idToElementMap.clear();
+    this.elementToIdMap = new WeakMap();
     this.counter = 1;
   }
 
-  public register(element: Element): string {
+  public clear(): void {
+    this.reset();
+  }
+
+  public register(element: Element, customId?: string): string {
+    if (customId) {
+      this.idToElementMap.set(customId, element);
+      this.elementToIdMap.set(element, customId);
+      return customId;
+    }
+
     if (this.elementToIdMap.has(element)) {
       return this.elementToIdMap.get(element)!;
     }
