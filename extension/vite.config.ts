@@ -44,6 +44,10 @@ function copyManifestPlugin() {
 }
 
 export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
