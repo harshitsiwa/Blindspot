@@ -50,7 +50,8 @@ export class DeterministicRedactor {
     if (!text || typeof text !== 'string') return text;
 
     let redacted = text;
-    const matches = detectPII(text);
+    const rawMatches = detectPII(text);
+    const matches = this.filterOverlappingMatches(rawMatches);
 
     // Sort matches in reverse index order to replace without invalidating indices
     matches.sort((a, b) => b.index - a.index);
@@ -65,6 +66,28 @@ export class DeterministicRedactor {
     }
 
     return redacted;
+  }
+
+  private filterOverlappingMatches(matches: import('./pii-detector').PIIMatch[]): import('./pii-detector').PIIMatch[] {
+    if (matches.length <= 1) return matches;
+
+    const sorted = [...matches].sort((a, b) => {
+      if (a.index !== b.index) return a.index - b.index;
+      return b.text.length - a.text.length;
+    });
+
+    const filtered: import('./pii-detector').PIIMatch[] = [];
+    let lastEnd = -1;
+
+    for (const match of sorted) {
+      const matchEnd = match.index + match.text.length;
+      if (match.index >= lastEnd) {
+        filtered.push(match);
+        lastEnd = matchEnd;
+      }
+    }
+
+    return filtered;
   }
 
   /**
