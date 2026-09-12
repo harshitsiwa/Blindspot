@@ -111,3 +111,35 @@ export function getSanitizedValuePlaceholder(type: string, name?: string): strin
 
   return '[REDACTED]';
 }
+
+import { EntityType, SensitivityLevel } from '../shared/types';
+
+export function getSensitivityLevelForEntity(entityType: EntityType | string): SensitivityLevel {
+  switch (entityType) {
+    case 'password':
+    case 'jwt':
+    case 'api_key':
+    case 'apiKey':
+    case 'private_key':
+    case 'privateKey':
+    case 'secret':
+    case 'otp':
+      return 'CREDENTIAL';
+    case 'ssn':
+    case 'pan':
+    case 'aadhaar':
+    case 'credit_card':
+    case 'account_number':
+      return 'HIGHLY_SENSITIVE';
+    case 'email':
+    case 'phone':
+    case 'unknown_sensitive':
+      return 'SENSITIVE';
+    case 'name':
+    case 'address':
+      return 'PERSONAL';
+    default:
+      return 'SENSITIVE';
+  }
+}
+
