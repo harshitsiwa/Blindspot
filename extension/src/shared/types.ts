@@ -23,6 +23,62 @@ export interface BoundingRect {
   height: number;
 }
 
+export type EntityType =
+  | 'email'
+  | 'phone'
+  | 'credit_card'
+  | 'ssn'
+  | 'pan'
+  | 'aadhaar'
+  | 'jwt'
+  | 'api_key'
+  | 'private_key'
+  | 'password'
+  | 'secret'
+  | 'name'
+  | 'address'
+  | 'account_number'
+  | 'otp'
+  | 'unknown_sensitive';
+
+export type SensitivityLevel =
+  | 'PUBLIC'
+  | 'PERSONAL'
+  | 'SENSITIVE'
+  | 'HIGHLY_SENSITIVE'
+  | 'CREDENTIAL';
+
+export type DetectionSource = 'dom' | 'text' | 'ocr' | 'visual';
+
+export interface PrivacyDetection {
+  type: EntityType;
+  sensitivity: SensitivityLevel;
+  confidence: number;
+  source: DetectionSource;
+  text: string;
+  start?: number;
+  end?: number;
+  elementId?: string;
+  region?: BoundingBox;
+  evidence?: string[];
+}
+
+export interface PrivacyRegion {
+  id: string;
+  type: EntityType;
+  sensitivity: SensitivityLevel;
+  confidence: number;
+  source: DetectionSource[];
+  elementId?: string;
+  textSpan?: {
+    start: number;
+    end: number;
+  };
+  bbox?: BoundingBox;
+  placeholder: string;
+}
+
+
 /**
   * Context Schema 2.0 Element representation
   */
@@ -112,6 +168,7 @@ export interface RedactionSummary {
 export interface PSSR {
   page: PageInfo & { viewport: ViewportDimensions };
   dom: DOMElement[];
+  text?: string[];
   visual_context: Record<string, unknown> | null;
   redaction_summary: RedactionSummary;
   screenshot: string | null;
