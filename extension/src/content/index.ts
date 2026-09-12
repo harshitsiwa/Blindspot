@@ -28,6 +28,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
               enabled: !el.disabled,
               sensitive: el.sensitive,
             })),
+            text: result.context.text,
             visual_context: result.context.visual,
             redaction_summary: result.context.redaction_summary || {
               totalElements: result.context.elements.length,
