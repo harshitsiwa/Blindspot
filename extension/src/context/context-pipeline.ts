@@ -5,16 +5,18 @@ import { getViewportDimensions, captureVisualContext } from './visual-capture';
 import { sanitizeUrl } from './url-sanitizer';
 import { deterministicRedactor } from '../privacy/redactor';
 import { runFinalPrivacyScan } from '../privacy/privacy-firewall';
+import { dynamicDOMObserver } from './dynamic-observer';
+import { fusionEngine } from '../privacy/privacy-fusion';
 
 /**
- * Main entry point for Phase 2 Context Intelligence pipeline.
+ * Main entry point for Context Intelligence perception pipeline.
  * Extracts, sanitizes, and verifies page context against local Privacy Firewall.
- * Exposes captureSanitizedContext() API contract for Phase 3 layer.
+ * Consumes latest validated local DynamicDOMObserver state and runs a final synchronous fail-closed scan.
  */
 export async function captureSanitizedContext(
   options: { includeScreenshot?: boolean; injectLeakForTest?: boolean } = {}
 ): Promise<ContextCaptureResult> {
-  // 1. Reset deterministic redactor mapping state for fresh context capture
+  // 1. Reset deterministic redactor mapping state for fresh perception cycle
   deterministicRedactor.reset();
 
   // 2. Extract interactive elements & apply deterministic PII redaction
@@ -24,16 +26,39 @@ export async function captureSanitizedContext(
   const rawTexts = extractPageText(document);
   const redactedTexts = rawTexts.map((txt) => deterministicRedactor.redactText(txt));
 
-  // 4. Extract page metadata & sanitize URL query parameters
+  // 4. Consume latest local DynamicDOMObserver privacy state without starting/stopping observer
+  const dynamicState = dynamicDOMObserver.getLatestPrivacyState();
+
+  // 5. Fuse evidence across DOM, text, and dynamic observer sources
+  const fusedRegions = fusionEngine.fuseEvidence({
+    domDetections: [],
+    textDetections: [],
+    dynamicDetections: dynamicState.allDetections,
+  });
+
+  // 6. Extract page metadata & sanitize URL query parameters
   const pageTitle = (document.title || 'Untitled Page').trim();
   const rawUrl = window.location.href;
   const sanitizedUrl = sanitizeUrl(rawUrl, deterministicRedactor);
 
-  // 5. Capture viewport & visual context
+  // 7. Capture viewport & visual context
   const viewport = getViewportDimensions();
   const visualContext = await captureVisualContext(options.includeScreenshot ?? false);
 
-  // 6. Build Context Schema 2.0 package
+  // 8. Calculate total sensitive redactions & build Context Schema 2.0 package
+  const localValueMap = deterministicRedactor.getLocalValueMap();
+  const totalSensitiveCount = Math.max(sensitiveCount + dynamicState.detectedCount, localValueMap.size);
+
+  const redactedFieldsList = Array.from(
+    new Set([
+      ...elements
+        .filter((el) => el.sensitive)
+        .map((el) => `${el.id}:${el.type}(${el.label || el.role})`),
+      ...fusedRegions.map((r) => `dynamic:${r.type}(${r.placeholder})`),
+      ...Array.from(localValueMap.values()).map((ph) => `text:${ph}`),
+    ])
+  );
+
   const contextPackage: SanitizedContext = {
     schema_version: '2.0',
     page: {
@@ -46,19 +71,17 @@ export async function captureSanitizedContext(
     visual: visualContext,
     redaction_summary: {
       totalElements: elements.length,
-      sensitiveCount,
-      redactedFields: elements
-        .filter((el) => el.sensitive)
-        .map((el) => `${el.id}:${el.type}(${el.label || el.role})`),
+      sensitiveCount: totalSensitiveCount,
+      redactedFields: redactedFieldsList,
     },
   };
 
-  // Intentional Privacy Firewall leak injection (used for Acceptance Test 10)
+  // Intentional Privacy Firewall leak injection (used for Acceptance Test)
   if (options.injectLeakForTest) {
     (contextPackage as unknown as Record<string, string>).leakedSecret = 'unredacted.leak@private-bank.com';
   }
 
-  // 7. Run mandatory local Privacy Firewall final scan
+  // 9. Run mandatory final local Privacy Firewall fail-closed scan prior to payload transmission
   const localMap = deterministicRedactor.getLocalValueMap();
   const firewallResult = runFinalPrivacyScan(contextPackage, localMap);
 
