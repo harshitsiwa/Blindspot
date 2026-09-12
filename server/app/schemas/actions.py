@@ -58,6 +58,7 @@ class RedactionSummary(BaseModel):
 class PSSR(BaseModel):
     page: PageInfo
     dom: List[DOMElement]
+    text: Optional[List[str]] = Field(default_factory=list)
     visual_context: Optional[Dict[str, Any]] = None
     redaction_summary: RedactionSummary
     screenshot: Optional[str] = None
