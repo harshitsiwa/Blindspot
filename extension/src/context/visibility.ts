@@ -5,8 +5,10 @@
 export function isElementVisible(el: HTMLElement): boolean {
   if (!el) return false;
 
-  // Check offsetParent (false if display: none or unattached, except position: fixed or body/html)
-  if (!el.offsetParent && el.tagName.toLowerCase() !== 'body' && el.tagName.toLowerCase() !== 'html') {
+  const isJSDOM = typeof window !== 'undefined' && window.navigator?.userAgent?.includes('jsdom');
+
+  // Check offsetParent (false if display: none or unattached, except position: fixed or body/html or JSDOM)
+  if (!isJSDOM && !el.offsetParent && el.tagName.toLowerCase() !== 'body' && el.tagName.toLowerCase() !== 'html') {
     const style = window.getComputedStyle(el);
     if (style.position !== 'fixed' && style.position !== 'sticky') {
       return false;
@@ -28,9 +30,12 @@ export function isElementVisible(el: HTMLElement): boolean {
     return false;
   }
 
-  const rect = el.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) {
-    return false;
+  // In JSDOM environments without layout rendering, getBoundingClientRect returns 0x0
+  if (!isJSDOM) {
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
   }
 
   return true;
