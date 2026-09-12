@@ -102,7 +102,24 @@ export function extractDOMContext(
 
     if (rawValue && rawValue.trim().length > 0) {
       if (sensitive || inputType === 'password' || inputType === 'email' || inputType === 'tel') {
-        const category = inputType === 'password' ? 'PASSWORD' : inputType === 'email' ? 'EMAIL' : 'SECRET';
+        let category = 'SECRET';
+        const lowerName = (nameAttr || '').toLowerCase();
+        if (inputType === 'password' || lowerName.includes('pass')) {
+          category = 'PASSWORD';
+        } else if (inputType === 'email' || lowerName.includes('email')) {
+          category = 'EMAIL';
+        } else if (inputType === 'tel' || lowerName.includes('phone') || lowerName.includes('mobile')) {
+          category = 'PHONE';
+        } else if (lowerName.includes('card') || lowerName.includes('credit')) {
+          category = 'CARD';
+        } else if (lowerName.includes('pan')) {
+          category = 'PAN';
+        } else if (lowerName.includes('aadhaar') || lowerName.includes('adhar')) {
+          category = 'AADHAAR';
+        } else if (lowerName.includes('ssn')) {
+          category = 'SSN';
+        }
+
         sanitizedValue = redactor
           ? redactor.getPlaceholder(rawValue, category)
           : `[${category}_1]`;
